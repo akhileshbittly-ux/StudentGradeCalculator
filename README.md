@@ -4,7 +4,7 @@ A simple grade calculator available as a browser app and a Java Swing desktop ap
 
 ## Web app
 
-Open the [live calculator](https://akhileshbittly-ux.github.io/StudentGradeCalculator/) in a browser. Enter a student name, add subjects and marks out of 100, then select **Calculate result**. Use **Export report** to download a text report.
+Open the [live calculator] (https://akhileshbittly-ux.github.io/StudentGradeCalculator/)  in a browser. Enter a student name, add subjects and marks out of 100, then select **Calculate result**. Use **Export report** to download a text report.
 
 ## Features
 
