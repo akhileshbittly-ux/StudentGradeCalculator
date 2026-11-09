@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7fb">
+  <meta name="description" content="Calculate and export a student's subject grades.">
+  <title>Gradebook — Student Grade Calculator</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #192848;
+      background: #f5f7fb;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      --muted: #6f7c91;
+      --line: #e2e7ef;
+      --accent: #2c68d6;
+      --surface: #fff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      background:
+        radial-gradient(ellipse at 10% 0%, rgba(44, 104, 214, .08), transparent 34rem),
+        #f5f7fb;
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+
+    .shell {
+      width: min(100% - 40px, 900px);
+      margin: 0 auto;
+      padding: 54px 0 42px;
+    }
+
+    .eyebrow {
+      margin: 0 0 9px;
+      color: var(--accent);
+      font-size: .73rem;
+      font-weight: 800;
+      letter-spacing: .14em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 5vw, 2.45rem);
+      letter-spacing: -.045em;
+      line-height: 1.15;
+    }
+
+    .intro {
+      margin: 11px 0 28px;
+      color: var(--muted);
+      font-size: .98rem;
+      line-height: 1.6;
+    }
+
+    .card {
+      border: 1px solid rgba(226, 231, 239, .9);
+      border-radius: 18px;
+      background: var(--surface);
+      box-shadow: 0 14px 40px rgba(27, 44, 75, .07);
+    }
+
+    .student-card { padding: 22px 24px; }
+
+    label, .section-title {
+      color: #263650;
+      font-size: .88rem;
+      font-weight: 700;
+    }
+
+    .student-input {
+      display: block;
+      width: 100%;
+      height: 46px;
+      margin-top: 9px;
+      padding: 0 13px;
+      border: 1px solid #d9e0eb;
+      border-radius: 9px;
+      outline: none;
+      background: #fbfcfe;
+      color: #192848;
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(44, 104, 214, .12);
+    }
+
+    .subjects-section { margin-top: 28px; }
+
+    .section-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .section-title { margin: 0; font-size: 1.1rem; }
+    .section-note { color: var(--muted); font-size: .78rem; }
+
+    .subject-list { display: grid; gap: 10px; }
+
+    .subject-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 100px 120px 38px;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+    }
+
+    .subject-row input {
+      width: 100%;
+      height: 40px;
+      padding: 0 11px;
+      border: 1px solid #d9e0eb;
+      border-radius: 8px;
+      outline: none;
+      color: #192848;
+      background: #fbfcfe;
+    }
+
+    .subject-row .marks-input { text-align: center; }
+
+    .field-label {
+      display: block;
+      margin: 0 0 5px 2px;
+      color: var(--muted);
+      font-size: .67rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+    }
+
+    .remove-button {
+      width: 36px;
+      height: 36px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: #8793a7;
+      font-size: 1.2rem;
+    }
+
+    .remove-button:hover { background: #fff0f0; color: #b54747; }
+    .remove-button:disabled { visibility: hidden; cursor: default; }
+
+    .add-button {
+      margin-top: 13px;
+      padding: 8px 0;
+      border: 0;
+      background: transparent;
+      color: var(--accent);
+      font-size: .86rem;
+      font-weight: 700;
+    }
+
+    .add-button:hover { color: #194da9; }
+
+    .result-card {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 24px;
+      margin-top: 22px;
+      padding: 24px 28px;
+      border-radius: 15px;
+      background: #192848;
+      color: #fff;
+    }
+
+    .result-label {
+      margin: 0 0 5px;
+      color: #b8c7de;
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .1em;
+    }
+
+    .result-value {
+      margin: 0;
+      font-size: clamp(1.7rem, 5vw, 2.35rem);
+      font-weight: 750;
+      letter-spacing: -.04em;
+    }
+
+    .result-grade { font-size: 1.55rem; }
+
+    .divider { width: 1px; height: 52px; background: rgba(255,255,255,.2); }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .button {
+      min-height: 42px;
+      padding: 0 16px;
+      border: 1px solid #d9e0eb;
+      border-radius: 9px;
+      background: #fff;
+      color: #263650;
+      font-size: .84rem;
+      font-weight: 700;
+      transition: transform .12s, background .12s, box-shadow .12s;
+    }
+
+    .button:hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(27,44,75,.09); }
+    .button-primary { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .button-primary:hover { background: #2459b8; }
+    .button:focus-visible, .add-button:focus-visible, .remove-button:focus-visible {
+      outline: 3px solid rgba(44, 104, 214, .3);
+      outline-offset: 2px;
+    }
+
+    .status {
+      min-height: 1.2em;
+      margin: 10px 0 0;
+      color: #b54747;
+      font-size: .85rem;
+      text-align: right;
+    }
+
+    @media (max-width: 620px) {
+      .shell { width: min(100% - 28px, 900px); padding-top: 34px; }
+      .student-card { padding: 18px; }
+      .subject-row { grid-template-columns: minmax(0, 1fr) 70px 90px 30px; gap: 8px; padding: 10px; }
+      .subject-row input { padding: 0 8px; }
+      .remove-button { width: 30px; }
+      .result-card { gap: 13px; padding: 20px; }
+      .actions { justify-content: stretch; }
+      .actions .button { flex: 1 1 calc(50% - 10px); }
+    }
+
+    @media (max-width: 390px) {
+      .subject-row { grid-template-columns: minmax(0, 1fr) 62px 78px 28px; gap: 5px; padding: 8px; }
+      .section-note { font-size: .7rem; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <p class="eyebrow">ACADEMIC TOOLS</p>
+      <h1>Student Grade Calculator</h1>
+      <p class="intro">A clear view of every subject and the overall result. Enter marks out of 100 to get started.</p>
+    </header>
+
+    <section class="card student-card" aria-label="Student information">
+      <label for="student-name">Student name</label>
+      <input class="student-input" id="student-name" type="text" autocomplete="name" placeholder="e.g. Alex Morgan">
+    </section>
+
+    <section class="subjects-section" aria-labelledby="subjects-heading">
+      <div class="section-heading">
+        <h2 class="section-title" id="subjects-heading">Subjects</h2>
+        <span class="section-note">Each subject is marked out of 100</span>
+      </div>
+      <div class="subject-list" id="subject-list"></div>
+      <button class="add-button" id="add-subject" type="button">+ Add a subject</button>
+    </section>
+
+    <section class="result-card" aria-live="polite" aria-label="Calculated result">
+      <div>
+        <p class="result-label">OVERALL PERCENTAGE</p>
+        <p class="result-value" id="percentage">—</p>
+      </div>
+      <div class="divider" aria-hidden="true"></div>
+      <div>
+        <p class="result-label">FINAL GRADE</p>
+        <p class="result-value result-grade" id="grade">N/A</p>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button class="button" id="reset" type="button">Reset</button>
+      <button class="button" id="export" type="button">Export report</button>
+      <button class="button button-primary" id="calculate" type="button">Calculate result</button>
+    </div>
+    <p class="status" id="status" role="status"></p>
+  </main>
+
+  <script>
+    "use strict";
+
+    const subjectList = document.getElementById("subject-list");
+    const statusMessage = document.getElementById("status");
+    const percentageOutput = document.getElementById("percentage");
+    const gradeOutput = document.getElementById("grade");
+    let result = null;
+
+    function addSubject(name = "") {
+      const row = document.createElement("div");
+      row.className = "subject-row";
+
+      const nameField = document.createElement("div");
+      const nameLabel = document.createElement("label");
+      nameLabel.className = "field-label";
+      nameLabel.textContent = "SUBJECT";
+      const nameInput = document.createElement("input");
+      nameInput.type = "text";
+      nameInput.className = "subject-name";
+      nameInput.placeholder = "e.g. Mathematics";
+      nameInput.value = name;
+      nameInput.setAttribute("aria-label", "Subject name");
+      nameField.append(nameLabel, nameInput);
+
+      const maxField = document.createElement("div");
+      const maxLabel = document.createElement("span");
+      maxLabel.className = "field-label";
+      maxLabel.textContent = "MAX";
+      const maxInput = document.createElement("input");
+      maxInput.value = "100";
+      maxInput.readOnly = true;
+      maxInput.setAttribute("aria-label", "Maximum marks");
+      maxField.append(maxLabel, maxInput);
+
+      const marksField = document.createElement("div");
+      const marksLabel = document.createElement("label");
+      marksLabel.className = "field-label";
+      marksLabel.textContent = "MARKS";
+      const marksInput = document.createElement("input");
+      marksInput.type = "number";
+      marksInput.className = "marks-input";
+      marksInput.min = "0";
+      marksInput.max = "100";
+      marksInput.step = "1";
+      marksInput.value = "0";
+      marksLabel.htmlFor = `marks-${crypto.randomUUID()}`;
+      marksInput.id = marksLabel.htmlFor;
+      marksInput.setAttribute("aria-label", "Marks scored out of 100");
+      marksField.append(marksLabel, marksInput);
+
+      const removeButton = document.createElement("button");
+      removeButton.className = "remove-button";
+      removeButton.type = "button";
+      removeButton.textContent = "×";
+      removeButton.setAttribute("aria-label", "Remove subject");
+      removeButton.addEventListener("click", () => {
+        row.remove();
+        updateRemoveButtons();
+        invalidateResult();
+      });
+
+      row.append(nameField, maxField, marksField, removeButton);
+      subjectList.append(row);
+      updateRemoveButtons();
+    }
+
+    function updateRemoveButtons() {
+      const rows = [...subjectList.children];
+      rows.forEach((row) => {
+        row.querySelector(".remove-button").disabled = rows.length === 1;
+      });
+    }
+
+    function invalidateResult() {
+      result = null;
+      percentageOutput.textContent = "—";
+      gradeOutput.textContent = "N/A";
+      statusMessage.textContent = "";
+    }
+
+    function calculate() {
+      statusMessage.textContent = "";
+      const studentName = document.getElementById("student-name").value.trim();
+      if (!studentName) {
+        statusMessage.textContent = "Please enter the student's name.";
+        document.getElementById("student-name").focus();
+        return;
+      }
+
+      const rows = [...subjectList.children];
+      const subjects = [];
+      for (const [index, row] of rows.entries()) {
+        const name = row.querySelector(".subject-name").value.trim();
+        const marksText = row.querySelector(".marks-input").value.trim();
+        if (!name) {
+          statusMessage.textContent = `Please enter a name for subject ${index + 1}.`;
+          row.querySelector(".subject-name").focus();
+          return;
+        }
+        if (marksText === "" || !Number.isInteger(Number(marksText))) {
+          statusMessage.textContent = `Enter a whole-number mark for ${name}.`;
+          row.querySelector(".marks-input").focus();
+          return;
+        }
+        const marks = Number(marksText);
+        if (marks < 0 || marks > 100) {
+          statusMessage.textContent = `Marks for ${name} must be between 0 and 100.`;
+          row.querySelector(".marks-input").focus();
+          return;
+        }
+        subjects.push({ name, marks });
+      }
+
+      const total = subjects.reduce((sum, subject) => sum + subject.marks, 0);
+      const percentage = total / subjects.length;
+      const failed = subjects.some((subject) => subject.marks < 35);
+      let grade;
+      if (failed) grade = "FAIL";
+      else if (percentage >= 90) grade = "A+";
+      else if (percentage >= 80) grade = "A";
+      else if (percentage >= 70) grade = "B+";
+      else if (percentage >= 60) grade = "B";
+      else if (percentage >= 50) grade = "C";
+      else grade = "D";
+
+      result = { studentName, subjects, percentage, grade };
+      percentageOutput.textContent = `${percentage.toFixed(2)}%`;
+      gradeOutput.textContent = grade;
+    }
+
+    function reset() {
+      document.getElementById("student-name").value = "";
+      subjectList.replaceChildren();
+      addSubject("Python");
+      addSubject("Java");
+      addSubject("C++");
+      invalidateResult();
+    }
+
+    function exportReport() {
+      if (!result) {
+        statusMessage.textContent = "Calculate a result before exporting the report.";
+        return;
+      }
+      const lines = [
+        "STUDENT GRADE REPORT",
+        "====================",
+        "",
+        `Student Name: ${result.studentName}`,
+        "",
+        ...result.subjects.map(({ name, marks }) => `${name} : ${marks} / 100`),
+        "",
+        `Percentage: ${result.percentage.toFixed(2)}%`,
+        `Overall Grade: ${result.grade}`,
+        ""
+      ];
+      const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "StudentGradeResult.txt";
+      link.click();
+      URL.revokeObjectURL(url);
+      statusMessage.textContent = "Report downloaded.";
+    }
+
+    document.getElementById("add-subject").addEventListener("click", () => addSubject());
+    document.getElementById("calculate").addEventListener("click", calculate);
+    document.getElementById("reset").addEventListener("click", reset);
+    document.getElementById("export").addEventListener("click", exportReport);
+    subjectList.addEventListener("input", invalidateResult);
+    document.getElementById("student-name").addEventListener("input", invalidateResult);
+
+    addSubject("Python");
+    addSubject("Java");
+    addSubject("C++");
+  </script>
+</body>
+</html>
