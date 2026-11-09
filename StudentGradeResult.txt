@@ -1,0 +1,11 @@
+STUDENT GRADE REPORT
+====================
+
+Student Name: sujay
+
+Python : 043 / 100
+Java : 033 / 100
+C++ : 044 / 100
+
+Percentage: 40.00%
+Overall Grade: FAIL
